@@ -58,7 +58,7 @@ public class SumoEvent {
             Bukkit.broadcastMessage("player 2 is " + player2.getName());
             player1.teleport(arena.getLoc1());
             player2.teleport(arena.getLoc2());
-            startNewFightTask();
+            startFightTask();
         }
     }
 
@@ -80,7 +80,7 @@ public class SumoEvent {
         }
         winner.teleport(arena.getSpawn());
         if(participants.size() > 1){
-            startNewNextFight();
+            startNextFight();
         }else if(participants.size() == 1){
             // WINNER
             Bukkit.broadcastMessage(winner.getName() + " hat gewonnen!");
@@ -106,13 +106,13 @@ public class SumoEvent {
         time++;
     }
 
-    private void startNewNextFight(){
+    private void startNextFight(){
         time = 5;
         sumoTask = Bukkit.getScheduler().runTaskTimer(plugin, this::nextFightTick,20, 20);
 
     }
 
-    private void startNewFightTask(){
+    private void startFightTask(){
         time = 3;
         this.fightState = FightState.START;
         sumoTask = Bukkit.getScheduler().runTaskTimer(plugin, this::fightTick,10, 1);
