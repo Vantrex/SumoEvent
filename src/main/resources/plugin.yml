@@ -1,0 +1,7 @@
+name: Sumo
+version: 1.0.0
+author: Vantrex
+description: Sumo Event
+main: de.vantrex.sumo.SumoPlugin
+depend:
+  - Event
