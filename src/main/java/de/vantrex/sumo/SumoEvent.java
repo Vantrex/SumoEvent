@@ -4,12 +4,10 @@ import de.vantrex.azure.AzurePlugin;
 import de.vantrex.sumo.arena.Arena;
 import de.vantrex.sumo.profile.SumoProfile;
 import lombok.Getter;
-import lombok.Setter;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
-import org.omg.CORBA.ARG_IN;
 
 import java.util.*;
 
@@ -30,7 +28,7 @@ public class SumoEvent {
 
     private final List<Player> participants = new ArrayList<>();
     private final Set<Player> spectators = new HashSet<>();
-    int time = 5;
+    long time = 5;
 
     public SumoEvent(SumoPlugin plugin, Arena arena){
         this.arena = arena;
@@ -43,7 +41,7 @@ public class SumoEvent {
     private void nextFightTick(){
 
         time--;
-        Bukkit.getOnlinePlayers().forEach(player -> player.setLevel(time));
+        Bukkit.getOnlinePlayers().forEach(player -> player.setLevel(Integer.parseInt(String.valueOf(time))));
         if(time == 0){
             sumoTask.cancel();
 
@@ -120,7 +118,7 @@ public class SumoEvent {
     }
 
     private void startFightTask(){
-        time = 3;
+        time = 3 * 20;
         this.fightState = FightState.START;
         sumoTask = Bukkit.getScheduler().runTaskTimer(plugin, this::fightTick,10, 1);
     }
