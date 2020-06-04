@@ -37,7 +37,9 @@ public class SumoProfile extends TimedDatabaseUpdate implements ProfileAdaption
     }
 
     @Override
-    public void onUnload() { }
+    public void onUnload() {
+        saveDataAsync();
+    }
 
     @Override
     public void saveData() {
