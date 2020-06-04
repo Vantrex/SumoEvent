@@ -1,6 +1,8 @@
 package de.vantrex.sumo;
 
+import de.vantrex.azure.AzurePlugin;
 import de.vantrex.sumo.arena.Arena;
+import de.vantrex.sumo.profile.SumoProfile;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Bukkit;
@@ -71,6 +73,8 @@ public class SumoEvent {
             loser.setGameMode(GameMode.CREATIVE);
             loser.setFlying(true);
             loser.setAllowFlight(true);
+            SumoProfile loserProfile = (SumoProfile) AzurePlugin.getInstance().getProfileManager().getProfile(loser).getAdaption(SumoProfile.class);
+            loserProfile.addDeath();
             participants.remove(loser);
             spectators.add(loser);
             loser.teleport(arena.getSpectate());
@@ -79,11 +83,14 @@ public class SumoEvent {
             participants.forEach(player -> loser.showPlayer(player));
         }
         winner.teleport(arena.getSpawn());
+        SumoProfile winnerProfile = (SumoProfile) AzurePlugin.getInstance().getProfileManager().getProfile(winner).getAdaption(SumoProfile.class);
+        winnerProfile.addKill();
         if(participants.size() > 1){
             startNextFight();
         }else if(participants.size() == 1){
             // WINNER
             Bukkit.broadcastMessage(winner.getName() + " hat gewonnen!");
+            winnerProfile.addWin();
             Bukkit.getScheduler().runTaskLater(this.plugin, Bukkit::shutdown, 20 * 10);
         }else{
             // IDK WHAT HAPPENED HERE BUT WE DO NOT HAVE A WINNER I REPEAT, WE DO NOT HAVE A WINNER

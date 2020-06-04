@@ -24,6 +24,18 @@ public class SumoProfile extends TimedDatabaseUpdate implements ProfileAdaption
         this.profile = profile;
     }
 
+    public void addWin(){
+        wins++;
+    }
+
+    public void addKill(){
+        kills++;
+    }
+
+    public void addDeath(){
+        deaths++;
+    }
+
     @Override
     public void onUnload() { }
 

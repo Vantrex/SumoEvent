@@ -1,10 +1,13 @@
 package de.vantrex.sumo.listeners.event;
 
+import de.vantrex.azure.AzurePlugin;
 import de.vantrex.sumo.SumoEvent;
 import de.vantrex.sumo.SumoPlugin;
+import de.vantrex.sumo.profile.SumoProfile;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
@@ -41,12 +44,14 @@ public class SumoEventListener implements Listener {
         }
     }
 
-    @EventHandler
-    public void onPLayerQuit(PlayerQuitEvent event){
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onPlayerQuit(PlayerQuitEvent event){
         Player player = event.getPlayer();
         if(plugin.getSumoEvent() != null){
             if((plugin.getSumoEvent().getPlayer1() == player || plugin.getSumoEvent().getPlayer2() == player)){
                 plugin.getSumoEvent().getParticipants().remove(player);
+                SumoProfile loserProfile = (SumoProfile) AzurePlugin.getInstance().getProfileManager().getProfile(player).getAdaption(SumoProfile.class);
+                loserProfile.addDeath();
                 plugin.getSumoEvent().onFightEnd(plugin.getSumoEvent().getPlayer1() == player ? plugin.getSumoEvent().getPlayer2() : plugin.getSumoEvent().getPlayer1(), null);
             }
         }
