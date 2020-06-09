@@ -16,7 +16,7 @@ import java.util.*;
 @Getter
 public class SumoEvent {
 
-    public final static String PREFIX = /*"§6§lSUMO §8§l┃ §b" */ StringDefaults.PREFIX ;
+    public final static String PREFIX = /*"§6§lSUMO §8§l┃ §b" */ StringDefaults.SHORT_PREFIX ;
 
     private final static Random RANDOM = new Random();
 

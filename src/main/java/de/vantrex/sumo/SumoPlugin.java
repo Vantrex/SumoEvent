@@ -11,6 +11,7 @@ import lombok.Setter;
 import lombok.SneakyThrows;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
+import org.bukkit.entity.EntityType;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.FileUtil;
 
@@ -45,6 +46,8 @@ public class SumoPlugin extends JavaPlugin {
         loadMessages("en_EN");
 
         getServer().getPluginManager().registerEvents(new EnableEventPluginListener(this), this);
+
+
         Bukkit.getScheduler().runTaskLater(this, () -> {
             Bukkit.getWorlds().forEach(world -> {
                 disableGameRules(world,
@@ -54,8 +57,14 @@ public class SumoPlugin extends JavaPlugin {
                         "doFireTick",
                         "showDeathMessages"
                 );
+
+                world.getEntities().forEach(entity -> {
+                    if(entity.getType().isAlive()) entity.remove();
+                    if(entity.getType() == EntityType.DROPPED_ITEM) entity.remove();
+                });
+                world.setTime(1200);
             });
-        }, 20 * 3);
+        }, 20 * 8);
 
         Connection connection = null;
         try{
