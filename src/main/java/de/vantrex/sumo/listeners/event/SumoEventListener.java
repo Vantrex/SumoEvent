@@ -66,6 +66,9 @@ public class SumoEventListener implements Listener {
 
                 plugin.getSumoEvent().setTime(3 * 20);
                 plugin.getSumoEvent().setFightState(SumoEvent.FightState.END);
+                final String playerName = player.getName();
+
+                Bukkit.getOnlinePlayers().forEach(online -> online.sendMessage(AzurePlugin.getInstance().getProfileManager().getProfile(online).getProfileData().getLanguage().get("message-game-win").replace("%winner%", plugin.getSumoEvent().getPlayer1() == player ? plugin.getSumoEvent().getPlayer2().getName() : plugin.getSumoEvent().getPlayer1().getName()).replace("%loser%", playerName)));
                 delay = System.currentTimeMillis() + 5000;
                 plugin.getSumoEvent().setCurrentFightWinner(plugin.getSumoEvent().getPlayer1() == player ? plugin.getSumoEvent().getPlayer2() : plugin.getSumoEvent().getPlayer1());
                 plugin.getSumoEvent().setCurrentFightLoser(player);

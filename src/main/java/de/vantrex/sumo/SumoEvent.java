@@ -95,12 +95,14 @@ public class SumoEvent {
 
                 participants.forEach(player -> loser.showPlayer(player));
                 spectators.forEach(player -> loser.showPlayer(player));
-                Bukkit.getOnlinePlayers().forEach(player -> player.sendMessage(AzurePlugin.getInstance().getProfileManager().getProfile(player).getProfileData().getLanguage().get("message-game-win").replace("%winner%",winner.getName()).replace("%loser%",loser.getName())));
             }
             winner.teleport(arena.getSpawn());
             SumoProfile winnerProfile = (SumoProfile) AzurePlugin.getInstance().getProfileManager().getProfile(winner).getAdaption(SumoProfile.class);
             winnerProfile.addKill();
             if(participants.size() > 1){
+                Bukkit.getScheduler().runTaskLater(plugin, () -> { // some delay here so we don´t spam
+                    AzurePlugin.getInstance().broadcast(null,"message-waiting-for-new-game");
+                },30);
                 startNextFight();
             }else if(participants.size() == 1){
                 this.winner = winner;
