@@ -4,6 +4,7 @@ import de.vantrex.azure.AzurePlugin;
 import de.vantrex.sumo.arena.Arena;
 import de.vantrex.sumo.profile.SumoProfile;
 import lombok.Getter;
+import lombok.Setter;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
@@ -20,22 +21,32 @@ public class SumoEvent {
 
     private final SumoPlugin plugin;
 
-    private Player player1, player2;
+    private Player player1, player2, winner;
 
     private BukkitTask sumoTask = null;
 
-    private FightState fightState;
+    @Setter private FightState fightState;
+
+    @Setter private Player currentFightWinner, currentFightLoser;
+
+    private int allPlayers = 0;
 
     private final List<Player> participants = new ArrayList<>();
     private final Set<Player> spectators = new HashSet<>();
-    long time = 5;
+    @Setter long time = 5;
 
     public SumoEvent(SumoPlugin plugin, Arena arena){
         this.arena = arena;
+        this.allPlayers = Bukkit.getOnlinePlayers().size();
         this.plugin = plugin;
+        this.winner = null;
+        this.player1 = null;
+        this.player2 = null;
         this.plugin.setSumoEvent(this);
         sumoTask = Bukkit.getScheduler().runTaskTimer(plugin, this::nextFightTick,20, 20);
         participants.addAll(Bukkit.getOnlinePlayers());
+
+
     }
 
     private void nextFightTick(){
@@ -54,11 +65,13 @@ public class SumoEvent {
             while (player2 == player1){
                 player2 = participants.get(RANDOM.nextInt(participants.size()));
             }
-            Bukkit.broadcastMessage("player 1 is " + player1.getName());
-            Bukkit.broadcastMessage("player 2 is " + player2.getName());
             player1.teleport(arena.getLoc1());
             player2.teleport(arena.getLoc2());
+            Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+               Bukkit.getOnlinePlayers().forEach(player -> player.sendMessage(AzurePlugin.getInstance().getProfileManager().getProfile(player).getProfileData().getLanguage().get("message-game-start-soon").replace("%player1%", player1.getName()).replace("%player2%", player2.getName())));
+            });
             startFightTask();
+
         }
     }
 
@@ -67,41 +80,63 @@ public class SumoEvent {
         sumoTask = null;
         player1 = null;
         player2 = null;
-        if(loser != null){
-            loser.setGameMode(GameMode.CREATIVE);
-            loser.setFlying(true);
-            loser.setAllowFlight(true);
-            SumoProfile loserProfile = (SumoProfile) AzurePlugin.getInstance().getProfileManager().getProfile(loser).getAdaption(SumoProfile.class);
-            loserProfile.addDeath();
-            participants.remove(loser);
-            spectators.add(loser);
-            loser.teleport(arena.getSpectate());
-            for(Player participant : participants)
-                participant.hidePlayer(loser);
-            participants.forEach(player -> loser.showPlayer(player));
-        }
-        winner.teleport(arena.getSpawn());
-        SumoProfile winnerProfile = (SumoProfile) AzurePlugin.getInstance().getProfileManager().getProfile(winner).getAdaption(SumoProfile.class);
-        winnerProfile.addKill();
-        if(participants.size() > 1){
-            startNextFight();
-        }else if(participants.size() == 1){
-            // WINNER
-            Bukkit.broadcastMessage(winner.getName() + " hat gewonnen!");
-            winnerProfile.addWin();
-            Bukkit.getScheduler().runTaskLater(this.plugin, Bukkit::shutdown, 20 * 10);
-        }else{
-            // IDK WHAT HAPPENED HERE BUT WE DO NOT HAVE A WINNER I REPEAT, WE DO NOT HAVE A WINNER
-            Bukkit.broadcastMessage("Gewinner konnte nicht ermittelt werden!");
-            Bukkit.getScheduler().runTaskLater(this.plugin, Bukkit::shutdown, 20 * 5);
-        }
+        Bukkit.getScheduler().runTask(plugin, () -> {
+            if(loser != null){
+                loser.setGameMode(GameMode.CREATIVE);
+                loser.setFlying(true);
+                loser.setAllowFlight(true);
+                SumoProfile loserProfile = (SumoProfile) AzurePlugin.getInstance().getProfileManager().getProfile(loser).getAdaption(SumoProfile.class);
+                loserProfile.addDeath();
+                participants.remove(loser);
+                spectators.add(loser);
+                loser.teleport(arena.getSpectate());
+                for(Player participant : participants)
+                    participant.hidePlayer(loser);
+
+                participants.forEach(player -> loser.showPlayer(player));
+                spectators.forEach(player -> loser.showPlayer(player));
+                Bukkit.getOnlinePlayers().forEach(player -> player.sendMessage(AzurePlugin.getInstance().getProfileManager().getProfile(player).getProfileData().getLanguage().get("message-game-win").replace("%winner%",winner.getName()).replace("%loser%",loser.getName())));
+            }
+            winner.teleport(arena.getSpawn());
+            SumoProfile winnerProfile = (SumoProfile) AzurePlugin.getInstance().getProfileManager().getProfile(winner).getAdaption(SumoProfile.class);
+            winnerProfile.addKill();
+            if(participants.size() > 1){
+                startNextFight();
+            }else if(participants.size() == 1){
+                this.winner = winner;
+                // WINNER
+                Bukkit.getOnlinePlayers().forEach(player -> player.sendMessage(AzurePlugin.getInstance().getProfileManager().getProfile(player).getProfileData().getLanguage().get("message-sumo-win").replace("%player%", winnerProfile.getProfile().getProfileData().getLastKnownName())));
+                winnerProfile.addWin();
+                Bukkit.getScheduler().runTaskLater(this.plugin, () -> {
+                    Bukkit.getOnlinePlayers().forEach(player -> player.kickPlayer(""));
+                }, 20 * 9);
+                Bukkit.getScheduler().runTaskLater(this.plugin, Bukkit::shutdown, 20 * 12);
+            }else{
+                // IDK WHAT HAPPENED HERE BUT WE DO NOT HAVE A WINNER I REPEAT, WE DO NOT HAVE A WINNER
+                Bukkit.getScheduler().runTaskLater(this.plugin, () -> {
+                    Bukkit.getOnlinePlayers().forEach(player -> player.kickPlayer(""));
+                }, 20 * 4);
+                Bukkit.getScheduler().runTaskLater(this.plugin, Bukkit::shutdown, 20 * 5);
+            }
+        });
+
+
 
 
     }
 
     private void fightTick(){
+        if(this.fightState == FightState.END){
+            if(time == 0){
+                onFightEnd(currentFightWinner,currentFightLoser);
+                return;
+            }
+            time--;
+            return;
+        }
         if(this.fightState == FightState.START){
             if(time == 0){
+                Bukkit.getOnlinePlayers().forEach(player -> player.sendMessage(AzurePlugin.getInstance().getProfileManager().getProfile(player).getProfileData().getLanguage().get("message-game-starting").replace("%player1%", player1.getName()).replace("%player2%", player2.getName())));
                 this.fightState = FightState.FIGHTING;
             }else {
                 time--;
@@ -112,6 +147,8 @@ public class SumoEvent {
     }
 
     private void startNextFight(){
+        currentFightLoser = null;
+        currentFightWinner = null;
         time = 5;
         sumoTask = Bukkit.getScheduler().runTaskTimer(plugin, this::nextFightTick,20, 20);
 
@@ -120,12 +157,13 @@ public class SumoEvent {
     private void startFightTask(){
         time = 3 * 20;
         this.fightState = FightState.START;
-        sumoTask = Bukkit.getScheduler().runTaskTimer(plugin, this::fightTick,10, 1);
+        sumoTask = Bukkit.getScheduler().runTaskTimerAsynchronously(plugin, this::fightTick,10, 1);
     }
 
     public enum FightState{
         START,
-        FIGHTING
+        FIGHTING,
+        END
     }
 
 }

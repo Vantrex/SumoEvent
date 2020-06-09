@@ -4,12 +4,18 @@ import de.vantrex.azure.AzurePlugin;
 import de.vantrex.azure.db.TimedDatabaseUpdate;
 import de.vantrex.azure.others.profile.Profile;
 import de.vantrex.azure.others.profile.ProfileAdaption;
+import lombok.Getter;
+import lombok.Setter;
 
+import javax.jws.WebService;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.HashSet;
+import java.util.Set;
 
+@Getter
 public class SumoProfile extends TimedDatabaseUpdate implements ProfileAdaption
 {
 
@@ -17,12 +23,27 @@ public class SumoProfile extends TimedDatabaseUpdate implements ProfileAdaption
     private int kills = 0;
     private int deaths = 0;
 
+
     private Profile profile;
+    @Setter private final Set<Long> clicks = new HashSet<>();
 
     public SumoProfile(Profile profile) {
         super("Sumo Profile", true);
         this.profile = profile;
+        loadDataAsync();
     }
+
+    public void addClick(){
+        this.clicks.add(System.currentTimeMillis());
+    }
+
+    public Integer getClicks(){
+
+        this.clicks.removeIf(time -> time < System.currentTimeMillis() - 1000);
+
+        return this.clicks.size();
+    }
+
 
     public void addWin(){
         wins++;

@@ -43,6 +43,7 @@ public class SumoPlugin extends JavaPlugin {
     public void onEnable() {
         loadMessages("de_DE");
         loadMessages("en_EN");
+
         getServer().getPluginManager().registerEvents(new EnableEventPluginListener(this), this);
         Bukkit.getScheduler().runTaskLater(this, () -> {
             Bukkit.getWorlds().forEach(world -> {
