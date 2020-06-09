@@ -68,7 +68,7 @@ public class SumoEventListener implements Listener {
                 plugin.getSumoEvent().setFightState(SumoEvent.FightState.END);
                 final String playerName = player.getName();
 
-                Bukkit.getOnlinePlayers().forEach(online -> online.sendMessage(AzurePlugin.getInstance().getProfileManager().getProfile(online).getProfileData().getLanguage().get("message-game-win").replace("%winner%", plugin.getSumoEvent().getPlayer1() == player ? plugin.getSumoEvent().getPlayer2().getName() : plugin.getSumoEvent().getPlayer1().getName()).replace("%loser%", playerName)));
+                Bukkit.getOnlinePlayers().forEach(online -> online.sendMessage(SumoEvent.PREFIX + AzurePlugin.getInstance().getProfileManager().getProfile(online).getProfileData().getLanguage().get("message-game-win").replace("%winner%", plugin.getSumoEvent().getPlayer1() == player ? plugin.getSumoEvent().getPlayer2().getName() : plugin.getSumoEvent().getPlayer1().getName()).replace("%loser%", playerName)));
                 delay = System.currentTimeMillis() + 5000;
                 plugin.getSumoEvent().setCurrentFightWinner(plugin.getSumoEvent().getPlayer1() == player ? plugin.getSumoEvent().getPlayer2() : plugin.getSumoEvent().getPlayer1());
                 plugin.getSumoEvent().setCurrentFightLoser(player);
@@ -92,8 +92,8 @@ public class SumoEventListener implements Listener {
                 Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
                     Bukkit.getOnlinePlayers().forEach(online -> {
                         Language language = AzurePlugin.getInstance().getProfileManager().getProfile(online).getProfileData().getLanguage();
-                        online.sendMessage(language.get("message-logout").replace("%player%",playerName));
-                        online.sendMessage(language.get("message-game-win").replace("%winner%", plugin.getSumoEvent().getPlayer1() == player ? plugin.getSumoEvent().getPlayer2().getName() : plugin.getSumoEvent().getPlayer1().getName()).replace("%loser%", playerName));
+                        online.sendMessage(SumoEvent.PREFIX + language.get("message-logout").replace("%player%",playerName));
+                        online.sendMessage(SumoEvent.PREFIX + language.get("message-game-win").replace("%winner%", plugin.getSumoEvent().getPlayer1() == player ? plugin.getSumoEvent().getPlayer2().getName() : plugin.getSumoEvent().getPlayer1().getName()).replace("%loser%", playerName));
                     });
                 });
                 plugin.getSumoEvent().onFightEnd(plugin.getSumoEvent().getPlayer1() == player ? plugin.getSumoEvent().getPlayer2() : plugin.getSumoEvent().getPlayer1(), null);

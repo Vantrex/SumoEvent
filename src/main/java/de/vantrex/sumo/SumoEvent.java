@@ -1,6 +1,7 @@
 package de.vantrex.sumo;
 
 import de.vantrex.azure.AzurePlugin;
+import de.vantrex.azure.utils.StringDefaults;
 import de.vantrex.sumo.arena.Arena;
 import de.vantrex.sumo.profile.SumoProfile;
 import lombok.Getter;
@@ -14,6 +15,8 @@ import java.util.*;
 
 @Getter
 public class SumoEvent {
+
+    public final static String PREFIX = /*"§6§lSUMO §8§l┃ §b" */ StringDefaults.PREFIX ;
 
     private final static Random RANDOM = new Random();
 
@@ -45,8 +48,9 @@ public class SumoEvent {
         this.plugin.setSumoEvent(this);
         sumoTask = Bukkit.getScheduler().runTaskTimer(plugin, this::nextFightTick,20, 20);
         participants.addAll(Bukkit.getOnlinePlayers());
-
-
+        Bukkit.getScheduler().runTaskLater(plugin, () -> { // some delay here so we don´t spam
+            AzurePlugin.getInstance().broadcast(PREFIX,"message-waiting-for-new-game");
+        },30);
     }
 
     private void nextFightTick(){
@@ -68,7 +72,7 @@ public class SumoEvent {
             player1.teleport(arena.getLoc1());
             player2.teleport(arena.getLoc2());
             Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-               Bukkit.getOnlinePlayers().forEach(player -> player.sendMessage(AzurePlugin.getInstance().getProfileManager().getProfile(player).getProfileData().getLanguage().get("message-game-start-soon").replace("%player1%", player1.getName()).replace("%player2%", player2.getName())));
+               Bukkit.getOnlinePlayers().forEach(player -> player.sendMessage(PREFIX + AzurePlugin.getInstance().getProfileManager().getProfile(player).getProfileData().getLanguage().get("message-game-start-soon").replace("%player1%", player1.getName()).replace("%player2%", player2.getName())));
             });
             startFightTask();
 
@@ -101,13 +105,13 @@ public class SumoEvent {
             winnerProfile.addKill();
             if(participants.size() > 1){
                 Bukkit.getScheduler().runTaskLater(plugin, () -> { // some delay here so we don´t spam
-                    AzurePlugin.getInstance().broadcast(null,"message-waiting-for-new-game");
+                    AzurePlugin.getInstance().broadcast(PREFIX,"message-waiting-for-new-game");
                 },30);
                 startNextFight();
             }else if(participants.size() == 1){
                 this.winner = winner;
                 // WINNER
-                Bukkit.getOnlinePlayers().forEach(player -> player.sendMessage(AzurePlugin.getInstance().getProfileManager().getProfile(player).getProfileData().getLanguage().get("message-sumo-win").replace("%player%", winnerProfile.getProfile().getProfileData().getLastKnownName())));
+                Bukkit.getOnlinePlayers().forEach(player -> player.sendMessage(PREFIX + AzurePlugin.getInstance().getProfileManager().getProfile(player).getProfileData().getLanguage().get("message-sumo-win").replace("%player%", winnerProfile.getProfile().getProfileData().getLastKnownName())));
                 winnerProfile.addWin();
                 Bukkit.getScheduler().runTaskLater(this.plugin, () -> {
                     Bukkit.getOnlinePlayers().forEach(player -> player.kickPlayer(""));
@@ -138,7 +142,7 @@ public class SumoEvent {
         }
         if(this.fightState == FightState.START){
             if(time == 0){
-                Bukkit.getOnlinePlayers().forEach(player -> player.sendMessage(AzurePlugin.getInstance().getProfileManager().getProfile(player).getProfileData().getLanguage().get("message-game-starting").replace("%player1%", player1.getName()).replace("%player2%", player2.getName())));
+                Bukkit.getOnlinePlayers().forEach(player -> player.sendMessage(PREFIX + AzurePlugin.getInstance().getProfileManager().getProfile(player).getProfileData().getLanguage().get("message-game-starting").replace("%player1%", player1.getName()).replace("%player2%", player2.getName())));
                 this.fightState = FightState.FIGHTING;
             }else {
                 time--;
