@@ -1,2 +1,4 @@
 name: Sumo
-description: Sumo Event. Knock players off a platform to proceed to the next round.
+description_de_DE: Sumo Event. Knock players off a platform to proceed to the next round.
+description_en_EN: Sumo Event. Werfe Spieler von einer Plattform, um in die nächste Runde zu gelangen.
+description: Sumo Event

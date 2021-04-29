@@ -2,6 +2,7 @@ package de.vantrex.sumo.listeners.event;
 
 import de.vantrex.azure.AzurePlugin;
 import de.vantrex.azure.event.EventPlugin;
+import de.vantrex.azure.event.events.PlayerStartSpectateEvent;
 import de.vantrex.azure.others.language.Language;
 import de.vantrex.sumo.SumoEvent;
 import de.vantrex.sumo.SumoPlugin;
@@ -148,5 +149,11 @@ public class SumoEventListener implements Listener {
     @EventHandler
     public void onBlockBreak(BlockBreakEvent event){
         event.setCancelled(true);
+    }
+
+    @EventHandler
+    public void onSpectate(PlayerStartSpectateEvent event){
+        Player player = event.getPlayer();
+        SumoPlugin.getInstance().getSumoEvent().onSpectate(player);
     }
 }

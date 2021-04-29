@@ -71,6 +71,7 @@ public class ScoreboardAdapter implements BoardAdapter {
             lines.add(lines.size(), new SidebarEntry("§6" + sumoEvent.getPlayer1().spigot().getPing() + " ms §fvs §6" + sumoEvent.getPlayer2().spigot().getPing() + " ms"));
         }
         lines.add(lines.size(),new SidebarEntry(""));
+        lines.add(lines.size(), new SidebarEntry("§dAspireMC.de"));
         lines.add(lines.size(), new SidebarEntry(ChatColor.GRAY, STRAIGHT_LINE, STRAIGHT_LINE + "-"));
         List<String> translated = Lists.newArrayList();
         for(SidebarEntry sidebarEntry : lines){

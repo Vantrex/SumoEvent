@@ -1,6 +1,7 @@
 package de.vantrex.sumo;
 
 import de.vantrex.azure.AzurePlugin;
+import de.vantrex.azure.event.events.EventEndEvent;
 import de.vantrex.azure.utils.StringDefaults;
 import de.vantrex.sumo.arena.Arena;
 import de.vantrex.sumo.profile.SumoProfile;
@@ -79,6 +80,19 @@ public class SumoEvent {
         }
     }
 
+    public void onSpectate(Player player){
+        player.setGameMode(GameMode.CREATIVE);
+        spectators.add(player);
+        player.setFlying(true);
+        player.setAllowFlight(true);
+        player.teleport(arena.getSpectate());
+        for(Player participant : participants)
+            participant.hidePlayer(player);
+
+        participants.forEach(player1 -> player1.showPlayer(player));
+        spectators.forEach(player1 -> player1.showPlayer(player));
+    }
+
     public void onFightEnd(Player winner, Player loser){
         sumoTask.cancel();
         sumoTask = null;
@@ -113,15 +127,21 @@ public class SumoEvent {
                 // WINNER
                 Bukkit.getOnlinePlayers().forEach(player -> player.sendMessage(PREFIX + AzurePlugin.getInstance().getProfileManager().getProfile(player).getProfileData().getLanguage().get("message-sumo-win").replace("%player%", winnerProfile.getProfile().getProfileData().getLastKnownName())));
                 winnerProfile.addWin();
+                new EventEndEvent(winner).call();
+
+                /*
                 Bukkit.getScheduler().runTaskLater(this.plugin, () -> {
                     Bukkit.getOnlinePlayers().forEach(player -> player.kickPlayer(""));
                 }, 20 * 9);
                 Bukkit.getScheduler().runTaskLater(this.plugin, Bukkit::shutdown, 20 * 12);
+
+                 */
             }else{
-                // IDK WHAT HAPPENED HERE BUT WE DO NOT HAVE A WINNER I REPEAT, WE DO NOT HAVE A WINNER
-                Bukkit.getScheduler().runTaskLater(this.plugin, () -> {
+                Bukkit.getScheduler().runTaskLater(plugin, () -> {
                     Bukkit.getOnlinePlayers().forEach(player -> player.kickPlayer(""));
-                }, 20 * 4);
+
+                }, 20 * 3);
+                // IDK WHAT HAPPENED HERE BUT WE DO NOT HAVE A WINNER I REPEAT, WE DO NOT HAVE A WINNER
                 Bukkit.getScheduler().runTaskLater(this.plugin, Bukkit::shutdown, 20 * 5);
             }
         });

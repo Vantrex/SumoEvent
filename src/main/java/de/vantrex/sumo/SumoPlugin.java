@@ -1,9 +1,10 @@
 package de.vantrex.sumo;
 
 import de.vantrex.azure.AzurePlugin;
+import de.vantrex.azure.event.EventPlugin;
 import de.vantrex.azure.event.mode.ServerMode;
-import de.vantrex.azure.listener.ListenerHandler;
 import de.vantrex.azure.manager.LanguageManager;
+import de.vantrex.event.SumoEventServerStatus;
 import de.vantrex.sumo.listeners.EnableEventPluginListener;
 import de.vantrex.sumo.managers.ArenaManager;
 import lombok.Getter;
@@ -45,10 +46,12 @@ public class SumoPlugin extends JavaPlugin {
         loadMessages("de_DE");
         loadMessages("en_EN");
 
+
         getServer().getPluginManager().registerEvents(new EnableEventPluginListener(this), this);
 
 
         Bukkit.getScheduler().runTaskLater(this, () -> {
+            EventPlugin.getInstance().setEventServerStatus(new SumoEventServerStatus());
             Bukkit.getWorlds().forEach(world -> {
                 disableGameRules(world,
                         "doDaylightCycle",
@@ -129,7 +132,7 @@ public class SumoPlugin extends JavaPlugin {
                     FileOutputStream fos = new FileOutputStream(propertiesFile);
                     prop2.store(fos,countryCode + " Language properties");
                 }
-            }else if(!propertiesFile.exists()){
+            } else if (!propertiesFile.exists()){
                 FileUtil.copy(en,propertiesFile);
             }
             en.delete();

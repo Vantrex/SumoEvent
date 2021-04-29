@@ -65,7 +65,6 @@
     </pluginRepositories>
 
     <dependencies>
-
         <!-- Azure -->
         <dependency>
             <groupId>de.vantrex.azure</groupId>
@@ -89,7 +88,6 @@
             <version>1.0-RELEASE</version>
             <scope>provided</scope>
         </dependency>
-
     </dependencies>
 
     <!-- Build Script -->

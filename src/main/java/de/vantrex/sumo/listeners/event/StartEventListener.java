@@ -4,11 +4,13 @@ import de.vantrex.azure.AzurePlugin;
 import de.vantrex.azure.event.EventPlugin;
 import de.vantrex.azure.event.events.StartEventEvent;
 import de.vantrex.azure.others.SpigotType;
-import de.vantrex.hardcorespigot.HardcoreSpigot;
+import de.vantrex.hardcorespigot.HardcoreSpigotServer;
 import de.vantrex.hardcorespigot.others.config.HardcoreSpigotConfig;
+import de.vantrex.hardcorespigot.profiles.knockback.KnockbackProfile;
 import de.vantrex.sumo.SumoEvent;
 import de.vantrex.sumo.SumoPlugin;
 import de.vantrex.sumo.arena.Arena;
+import de.vantrex.sumo.knockback.MineChaos2Template;
 import de.vantrex.sumo.scoreboard.ScoreboardAdapter;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
@@ -29,7 +31,9 @@ public class StartEventListener implements Listener {
 
         if(AzurePlugin.getInstance().getSpigotType() == SpigotType.HARDCORESPIGOT){
             HardcoreSpigotConfig.getInstance().SETTINGS.PERFORMANCE.WORLD.DO_CHUNK_UNLOAD = false;
-            HardcoreSpigot.getInstance().getKnockbackManager().setCurrentProfile(HardcoreSpigot.getInstance().getKnockbackManager().getProfiles().stream().filter(knockbackProfile -> knockbackProfile.getName().equalsIgnoreCase("kohi")).findFirst().orElse(HardcoreSpigot.getInstance().getKnockbackManager().getCurrentProfile()));
+            KnockbackProfile knockbackProfile = new KnockbackProfile("SumoEventKB");
+            HardcoreSpigotServer.getServer().getKnockbackManager().cloneTemplateValues(knockbackProfile, new MineChaos2Template("SumoEventKBTemplate"));
+            HardcoreSpigotServer.getServer().getKnockbackManager().setCurrentProfile(knockbackProfile);
          //   HardcoreSpigot.getInstance().getKnockbackManager().getProfiles().stream().filter(knockbackProfile -> knockbackProfile.getName().equalsIgnoreCase("MineChaos")).findFirst().orElse(null).getComboMode().setValue(false);
         }
         Arena arena = plugin.getArenaManager().getRandomArena();
